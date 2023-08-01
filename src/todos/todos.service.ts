@@ -34,7 +34,7 @@ export class TodosService {
     }
 
     findOneTodo(id: string){
-        return this.todos.find(todo => todo.id === Number(id));
+        return this.todos.find(todo => todo.id === +id);
     }
 
     create(todo: CreateTodoDto) {
@@ -48,5 +48,27 @@ export class TodosService {
             return new NotFoundException('Booooo did you find this todo')
         }
         // Apply to granulary update a single property
+        if (todo.hasOwnProperty('done')) {
+            todoToUpdate.done = todo.done;
+        }
+        if (todo.title) {
+            todoToUpdate.title = todo.title;
+        }
+        if (todo.description) {
+            todoToUpdate.description = todo.description;
+        }
+        const updatedTodos = this.todos.map(t => t.id !== +id ? t : todoToUpdate);
+        this.todos = [...updatedTodos];
+        return { updatedTodo: 1, todo: todoToUpdate };
+    }
+
+    deleteTodo(id: string){
+        const nbrOfBeforeDelete = this.todos.length;
+        this.todos = [...this.todos.filter(t => t.id !== +id)]
+        if (this.todos.length < nbrOfBeforeDelete) {
+            return {deletedTodos: 1, nbrTodos: this.todos.length};
+        }else{
+            return { deletedTodos: 0, nbrTodos: this.todos.length }; 
+        }
     }
 }
